@@ -2,9 +2,8 @@
 <h1> The Single Desktop App for:</h1>
 <ul>
   <li>Creating on-the-go Excel Files</li>
-  <li>Editing and saving .txt files in-app</li>
+  <li>Creating, editing and saving .txt files in-app</li>
   <li>Creating and Accessing SQLite Databases</li>
-  <li>Accessing and utilizing remote SQL Databases</li>
  </ul>
  
  <h2>App created using the following technologies:</h2>
