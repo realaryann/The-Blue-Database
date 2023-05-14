@@ -11,6 +11,6 @@
  <ul>
   <li>Python3</li>
   <li>Tkinter</li>
-  <li>SQLite3<li>
+  <li>SQLite3</li>
   <li>mysql-connector</li>
  </ul>
