@@ -4,14 +4,38 @@ from tkinter import messagebox
 import sqlite3
 count=0
 
+def isfloat(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
+    
+def insert_call():
+    lister=[]
+    for j in range(len(names)):
+        if (textbox[j].get(1.0, "end-1c")).isnumeric():
+            lister.append(int(textbox[j].get(1.0, "end-1c")))
+        elif isfloat(textbox[j].get(1.0, "end-1c")):
+            lister.append(float(textbox[j].get(1.0, "end-1c")))
+        else:
+            lister.append(textbox[j].get(1.0, "end-1c"))
+    i=len(names)
+    demo = "?,"
+    demo=demo*i
+    query = f"Insert into {tableentry.get()} values({demo[0:-1]});"
+    cur.execute(query,lister)
+    con.commit()
+    
 def add_values():
+    global names
     temp = cur.execute(f"Select * from {tableentry.get()};")
     names = [description[0] for description in temp.description]
     addvalwin= Toplevel()
     addvalwin.configure(bg="lightblue3")
     toplab = Label(addvalwin,text="Add Records to Table",bg="slategrey")
     toplab.configure(font=("modern",40))    
-    toplab.pack(padx=50)
+    toplab.pack()
     frameval = LabelFrame(addvalwin,padx=50,pady=20,bg="slategrey")
     frameval.pack(padx=50,pady=50)
     columnbox = []
@@ -21,21 +45,29 @@ def add_values():
         columnbox[j].grid(row=0,column=j)
         columnbox[j].config(state=DISABLED)
         columnbox[j].configure(font=("Modern",13),bg="slategrey")
+    global textbox
     textbox = list()
     for i in range(len(names)):
         textbox.append(Text(frameval, height = 1, width = 20, wrap = None ))
         textbox[i].insert(INSERT,"")
         textbox[i].grid(row=1,column=i)
         textbox[i].configure(font=("Modern",13),bg="slategrey")
+    submit = Button(addvalwin,text="Insert In Table",bg="slategrey",command=insert_call)
+    submit.configure(font=("Modern",15))
+    submit.pack()
+    addvalwin.resizable(False, False)
     
 def view_columns():
     global cur
     global con
     rev = Toplevel()
     rev.configure(bg="lightblue3")
+    topster = Label(rev,text="View Table",bg="slategrey")
+    topster.configure(font=("Modern",20))
+    topster.pack()
     dem = cur.execute(f"select * from {tableentry.get()};")
     res = dem.fetchall()
-    output = Text(rev, height=5, width=30)
+    output = Text(rev, height=10, width=30,padx=100,pady=100,bg="lightblue3")
     output.configure(font=("modern",15))
     output.pack()
     if (res == []):
@@ -43,6 +75,7 @@ def view_columns():
     else:
         for item in res:
             output.insert(END, str(item)+'\n')
+    output.config(state=DISABLED)
     con.commit()
     
     
@@ -65,7 +98,6 @@ def add_column():
     global tabname
     global count
     count=count+1
-    print(count)
     if (count==1):
         query= f"CREATE table {tabname}({cnentry.get()} {result});"
         cur.execute(query)
@@ -147,6 +179,8 @@ def check_table():
     
     
 def sqlitepage():
+    global count
+    count=0
     global sqlitepage
     sqlitepage= Toplevel() 
     sqlitepage.title("Sqlite Initialization")
