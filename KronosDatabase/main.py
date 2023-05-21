@@ -2,7 +2,17 @@ from tkinter import *
 import tkinter.font as tkFont
 from tkinter import messagebox
 import sqlite3
+import csv
 count=0
+
+def validation(text):
+    test = text.get()
+    if len(test) == 0:
+        msg = "You have entered Empty Text!"
+        messagebox.showinfo('Error', msg)
+        return 1
+    else:
+        return 0
 
 def isfloat(num):
     try:
@@ -44,14 +54,14 @@ def add_values():
         columnbox[j].insert(INSERT,names[j])
         columnbox[j].grid(row=0,column=j)
         columnbox[j].config(state=DISABLED)
-        columnbox[j].configure(font=("Modern",13),bg="slategrey")
+        columnbox[j].configure(font=("Modern",13),bg="lightblue3")
     global textbox
     textbox = list()
     for i in range(len(names)):
         textbox.append(Text(frameval, height = 1, width = 20, wrap = None ))
         textbox[i].insert(INSERT,"")
         textbox[i].grid(row=1,column=i)
-        textbox[i].configure(font=("Modern",13),bg="slategrey")
+        textbox[i].configure(font=("Modern",13),bg="lightblue3")
     submit = Button(addvalwin,text="Insert In Table",bg="slategrey",command=insert_call)
     submit.configure(font=("Modern",15))
     submit.pack()
@@ -60,16 +70,27 @@ def add_values():
 def view_columns():
     global cur
     global con
+    temper = cur.execute(f"Select * from {tableentry.get()};")
+    name = [description[0] for description in temper.description]
     rev = Toplevel()
+    rev.title("View Table")
     rev.configure(bg="lightblue3")
-    topster = Label(rev,text="View Table",bg="slategrey")
+    topster = Label(rev,text="      ",bg="slategrey")
     topster.configure(font=("Modern",20))
-    topster.pack()
+    topster.grid(row=0,column=1)
     dem = cur.execute(f"select * from {tableentry.get()};")
     res = dem.fetchall()
     output = Text(rev, height=10, width=30,padx=100,pady=100,bg="lightblue3")
-    output.configure(font=("modern",15))
-    output.pack()
+    output.configure(font=("modern",25))
+    output.tag_configure('center',justify='center')
+    output.grid(row=1,column=1)
+    columnbox = []
+    for j in range(len(name)):
+        columnbox.append(Text(topster,height=1,width=20,wrap=None))
+        columnbox[j].insert(INSERT,name[j])
+        columnbox[j].grid(row=0,column=j)
+        columnbox[j].config(state=DISABLED)
+        columnbox[j].configure(font=("Modern",13),bg="lightblue3")
     if (res == []):
         output.insert(END, "No Item in Columns"+'\n')
     else:
@@ -77,16 +98,19 @@ def view_columns():
             output.insert(END, str(item)+'\n')
     output.config(state=DISABLED)
     con.commit()
+    rev.resizable(FALSE,FALSE)
     
     
 def view_table():
     view=Toplevel()
+    view.title("View/Update Table")
     top = Label(view,text="View/Update Existing Table",bg="slategrey",padx=67)
     top.configure(font=("modern",35))
+    view.configure(bg="lightblue3")
     top.pack()
     frame=LabelFrame(view,bg="lightblue3",padx=150,pady=150)
     frame.pack()
-    print_all_columns=Button(frame,text="Press to view all columns",bg="slategrey",padx=40,pady=30,command=view_columns);
+    print_all_columns=Button(frame,text="Press to view all columns",bg="slategrey",padx=35,pady=30,command=view_columns);
     print_all_columns.grid(row=1,column=0,padx=10,pady=20)
     print_all_columns.configure(font=("modern",15))
     updatebutton = Button(frame, text= "Add Records",padx=86,bg ="slategrey", pady=30,command=add_values)
@@ -95,46 +119,48 @@ def view_table():
     view.resizable(False, False)
     
 def add_column():
-    global tabname
-    global count
-    count=count+1
-    if (count==1):
-        query= f"CREATE table {tabname}({cnentry.get()} {result});"
-        cur.execute(query)
-    else:    
-        query1 = f"ALTER table {tabname} add {cnentry.get()} {result};"
-        cur.execute(query1)
-    con.commit()
+    if validation(cnentry) == 0:
+        global tabname
+        global count
+        count=count+1
+        if (count==1):
+            query= f"CREATE table {tabname}({cnentry.get()} {result});"
+            cur.execute(query)
+        else:    
+            query1 = f"ALTER table {tabname} add {cnentry.get()} {result};"
+            cur.execute(query1)
+        con.commit()
 
     
 def new_table_next():
-    global result
-    global cnentry
-    global tabname
-    tabname = tablename.get()
-    newtableui.destroy()
-    nextui = Toplevel()
-    nextui.configure(bg="lightblue3")
-    nextui.title("Table Initialization")
-    nexttop = Label(nextui,text="Table Initialization",bg="slategrey",padx=10,pady=10)
-    nexttop.configure(font=("Modern",40))
-    nexttop.grid(row=0,column=1,pady=10,padx=40)
-    columnname = Label(nextui, text="Enter Column Name",bg="slategrey",padx=10,pady=10)
-    columnname.configure(font=("Modern",20))
-    columnname.grid(row=1,column=1,pady=20)
-    cnentry = Entry(nextui,width=40,borderwidth=5)
-    cnentry.grid(row=2,column=1,pady=20)
-    result=StringVar()
-    result.set("int")
-    typeinfo =  Label(nextui, text="Type",bg="slategrey",padx=10,pady=10)
-    typeinfo.configure(font=("Modern",15))
-    typeinfo.grid(row=3,column=1,pady=10)
-    typeentry=OptionMenu(nextui,result,"int","text","real","blob")
-    typeentry.grid(row=4,column=1)
-    addbut = Button(nextui, text="Add Column",bg="slategrey",padx=10,pady=10,command=add_column)
-    addbut.configure(font=("Modern",15))
-    addbut.grid(row=5,column=1,pady=20)
-    nextui.resizable(False, False)
+    if validation(tablename) == 0:
+        global result
+        global cnentry
+        global tabname
+        tabname = tablename.get()
+        newtableui.destroy()
+        nextui = Toplevel()
+        nextui.configure(bg="lightblue3")
+        nextui.title("Table Initialization")
+        nexttop = Label(nextui,text="Table Initialization",bg="slategrey",padx=10,pady=10)
+        nexttop.configure(font=("Modern",40))
+        nexttop.grid(row=0,column=1,pady=10,padx=40)
+        columnname = Label(nextui, text="Enter Column Name",bg="slategrey",padx=10,pady=10)
+        columnname.configure(font=("Modern",20))
+        columnname.grid(row=1,column=1,pady=20)
+        cnentry = Entry(nextui,width=40,borderwidth=5)
+        cnentry.grid(row=2,column=1,pady=20)
+        result=StringVar()
+        result.set("int")
+        typeinfo =  Label(nextui, text="Type",bg="slategrey",padx=10,pady=10)
+        typeinfo.configure(font=("Modern",15))
+        typeinfo.grid(row=3,column=1,pady=10)
+        typeentry=OptionMenu(nextui,result,"int","text","real","blob")
+        typeentry.grid(row=4,column=1)
+        addbut = Button(nextui, text="Add Column",bg="slategrey",padx=10,pady=10,command=add_column)
+        addbut.configure(font=("Modern",15))
+        addbut.grid(row=5,column=1,pady=20)
+        nextui.resizable(False, False)
       
 def new_table():
     global newtableui 
@@ -165,18 +191,56 @@ def pop_up():
         new_table()
         
 def check_table():
-    global con
-    con = sqlite3.connect(data.get())
-    global cur
-    cur=con.cursor()
-    query = f"SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='{tableentry.get()}';"
-    list1=cur.execute(query).fetchall()
-    con.commit()
-    if list1 == []:
-        pop_up()
-    else:
-        view_table()
+    if validation(data) == 0 and validation(tableentry)==0:
+        global con
+        con = sqlite3.connect(data.get())
+        global cur
+        cur=con.cursor()
+        query = f"SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='{tableentry.get()}';"
+        list1=cur.execute(query).fetchall()
+        con.commit()
+        if list1 == []:
+            pop_up()
+        else:
+            view_table() 
+
+def real_generator(exdata, extableentry,filename):
+    if '.csv' not in filename:
+        filename=filename+'.csv'
+    fp = open(filename,'w')
+    write = csv.writer(fp)
+    exxcon = sqlite3.connect(exdata.get())
+    exxcur = exxcon.cursor()
+    query = f"select * from {extableentry.get()};"
+    extemp=exxcur.execute(query)
+    insertlist = extemp.fetchall()
+    for i in insertlist:
+        write.writerow(i)
     
+def excel_generator(exdata, extableentry):
+    exdesign = Toplevel()
+    exdesign.configure(bg="lightblue3")
+    exdlabel = Label(exdesign,text="Enter File Name",bg="slategrey",padx=30,pady=20)
+    exdlabel.configure(font=("modern",30))
+    exdlabel.grid(row=0,column=1,pady=30)
+    exinp = Entry(exdesign, width=60,borderwidth=5)
+    exinp.grid(row=1, column = 1,pady=20,padx=50)
+    exbut = Button(exdesign,text="Generate",bg="slategrey",padx=20,pady=10,command=lambda: real_generator(exdata,extableentry,exinp.get()))
+    exbut.configure(font=("Modern",16))
+    exbut.grid(row = 2, column=1,pady=20)
+
+def excheck_table(exdata,extableentry):
+    if validation(exdata) == 0 and validation(extableentry)==0:
+        excon = sqlite3.connect(exdata.get())
+        excur=excon.cursor()
+        exquery = f"SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='{extableentry.get()}';"
+        exlist1=excur.execute(exquery).fetchall()
+        excon.commit()
+        if exlist1 == []:
+            messagebox.showinfo('Error', "This table does not exist!")
+        else:
+            excel_generator(exdata,extableentry)
+        excon.close()
     
 def sqlitepage():
     global count
@@ -208,7 +272,29 @@ def sqlitepage():
     sqlitepage.resizable(False, False)
 
 def excelpage():
-    pass
+    exsqlitepage= Toplevel() 
+    exsqlitepage.title("Excel Initialization")
+    exsqlitepage.configure(bg="lightblue3")
+    exlabel2= Label(exsqlitepage,text="Excel Initialization",bg="slategrey",padx=10,pady=10)
+    exlabel2.config(font=('Modern',30))
+    exlabel2.grid(row=0,column=1)
+    exframe2 = LabelFrame(exsqlitepage,bg="slategrey", padx=200,pady=200)
+    exframe2.grid(row=1,column=1,padx=10,pady=10)
+    exdata=Entry(exframe2,width=60,borderwidth=4);
+    exdata.grid(row =1, column=0)
+    exdatalabel = Label(exframe2,text="Enter Database Name",bg="lightblue3",padx=10,pady=10)
+    exdatalabel.grid(row=0,column=0,pady=10)
+    extablelabel = Label(exframe2,text="Enter Table Name",bg="lightblue3",padx=10,pady=10)
+    extablelabel.grid(row=2,column=0,pady=10)
+    exdatalabel.config(font=('Modern',20))
+    extablelabel.config(font=('Modern',20))
+    extableentry= Entry(exframe2,width=60,borderwidth=4)
+    extableentry.grid(row=3,column=0)
+    exbutton1 = Button(exframe2,text="Generate Excel",padx=10,pady=10,bg = "lightblue3",command = lambda: excheck_table(exdata,extableentry))
+    exbutton1.grid(row=4,column=0,pady=10)
+    exbutton1.configure(font=('Modern',15))
+    exsqlitepage.resizable(False, False)
+    
 
 root = Tk()
 root.title("Kronos Database")
