@@ -4,6 +4,7 @@ from tkinter import messagebox
 import sqlite3
 import csv
 count=0
+primcheck=0
 
 def validation(text):
     test = text.get()
@@ -34,6 +35,7 @@ def insert_call():
     demo = "?,"
     demo=demo*i
     query = f"Insert into {tableentry.get()} values({demo[0:-1]});"
+    messagebox.showinfo('Success!',"The Entry has been added!")
     cur.execute(query,lister)
     con.commit()
     
@@ -42,6 +44,7 @@ def add_values():
     temp = cur.execute(f"Select * from {tableentry.get()};")
     names = [description[0] for description in temp.description]
     addvalwin= Toplevel()
+    addvalwin.iconbitmap("favicon.ico")
     addvalwin.configure(bg="lightblue3")
     toplab = Label(addvalwin,text="Add Records to Table",bg="slategrey")
     toplab.configure(font=("modern",40))    
@@ -73,6 +76,7 @@ def view_columns():
     temper = cur.execute(f"Select * from {tableentry.get()};")
     name = [description[0] for description in temper.description]
     rev = Toplevel()
+    rev.iconbitmap("favicon.ico")
     rev.title("View Table")
     rev.configure(bg="lightblue3")
     topster = Label(rev,text="      ",bg="slategrey")
@@ -99,38 +103,146 @@ def view_columns():
     output.config(state=DISABLED)
     con.commit()
     rev.resizable(FALSE,FALSE)
+
+def real_name_changer(newname,name):
+    global cur
+    tcquery=f"ALTER table {tableentry.get()} RENAME to {newname}"
+    cur.execute(tcquery)
+    con.commit()
+    messagebox.showinfo('Success!',f"The Table has been renamed to {newname}")
+    name.destroy()
     
+def change_name():
+    changetypewin = Toplevel()
+    changetypewin.iconbitmap("favicon.ico")
+    changetypewin.title("Update Table Name")
+    changetypewin.configure(bg="lightblue3")
+    cttop = Label(changetypewin,text="Change Table Name",bg="slategrey",padx=70,pady=30)
+    cttop.configure(font=("modern",30))
+    cttop.pack()
+    ctframe = LabelFrame(changetypewin,bg="lightblue3",padx=200,pady=50)
+    ctframe.pack()
+    cname = Label(ctframe,text="Enter New Table Name",padx=50,bg="slategrey",pady=20)
+    cname.configure(font=("Modern",15))
+    cname.grid(row = 0,column=1,pady=10)
+    ctentry=Entry(ctframe,width=50,borderwidth=4)
+    ctentry.grid(row = 1, column=1,pady=10)
+    ctBut = Button(ctframe, text="Submit",padx=30,pady=20,bg="slategrey",command=lambda: real_name_changer(ctentry.get(),changetypewin))
+    ctBut.configure(font=("Modern",10))
+    ctBut.grid(row = 2, column = 1, pady=10)
+
+def del_it(name_of_col, delete_this):
+    global cur
+    global con
+    dq= f"DELETE from {tableentry.get()} where {name_of_col} = {delete_this};"
+    rek = messagebox.showinfo("Delete Row", "Row has been deleted")
+    cur.execute(dq)
+    con.commit()
+
+def delete_rec():
+    delrec = Toplevel()
+    delrec.configure(bg="lightblue3")
+    delrec.iconbitmap("favicon.ico")
+    delrec.title("Delete Record")
+    deltop = Label(delrec,text="Delete Record",bg="slategrey",padx=67)
+    deltop.configure(font=("Modern",35))
+    deltop.pack()
+    delframe = LabelFrame(delrec,bg="lightblue3",padx=150,pady=30)
+    delframe.pack()
+    l2=[]
+    q=f"SELECT l.name FROM pragma_table_info('{tableentry.get()}') as l WHERE l.pk = 1;"
+    l2=cur.execute(q).fetchall()
+    textr = f"Enter {l2[0][0]} To Delete"
+    lab = Label(delframe,text =textr, bg="slategrey",padx= 50)
+    lab.configure(font=("Modern",15))
+    lab.grid(row=0, column=1,pady=10)
+    laben = Entry(delframe,width=50,borderwidth=5)
+    laben.grid(row=1, column=1,pady=10)
+    delsub= Button(delframe,text="Submit",bg="slategrey",padx=20,command=lambda:del_it(l2[0][0], laben.get()))
+    delsub.configure(font=("modern",15))
+    delsub.grid(row=2,column=1,pady=10)
+
+def real_get_record(primary_column,col,frame):
+    list1=[]
+    q=f"SELECT * from {tableentry.get()} where {primary_column}={col};"
+    list1=cur.execute(q).fetchall()
+    textrt = f"{list1[0]}"
+    result=Label(frame,text=textrt,padx=100,pady=20,bg="slategrey")
+    result.configure(font=("Modern",15))
+    result.grid(row=3,column=0,pady=20)
+
+def get_records(primary_column):
+    grec = Toplevel()
+    grec.configure(bg="lightblue3")
+    grec.iconbitmap("favicon.ico")
+    grec.title("Get Record")
+    grtop = Label(grec,text="Get Individual Record",bg="slategrey",padx=67)
+    grtop.configure(font=("Modern",35))
+    grtop.pack()
+    grframe = LabelFrame(grec, bg="lightblue3",padx=150,pady=30)
+    grframe.pack()
+    grtext = f"Enter The {primary_column} To Obtain Full Record"
+    grframelab = Label(grframe, text=grtext,bg="slategrey",padx=50,pady=10)
+    grframelab.grid(row = 0, column = 0, pady=20)
+    grframelab.configure(font=("Modern",17))
+    grframeent = Entry(grframe,border=50,borderwidth=5)
+    grframeent.grid(row=1, column=0,pady=20)
+    grsub = Button(grframe, text="Submit", padx=35,pady=10,bg="slategrey",command = lambda:real_get_record(primary_column, grframeent.get(),grframe))
+    grsub.configure(font=("Modern",15))
+    grsub.grid(row=2, column = 0,pady=20)
     
 def view_table():
+    global cur
     view=Toplevel()
+    view.iconbitmap("favicon.ico")
     view.title("View/Update Table")
     top = Label(view,text="View/Update Existing Table",bg="slategrey",padx=67)
     top.configure(font=("modern",35))
     view.configure(bg="lightblue3")
     top.pack()
-    frame=LabelFrame(view,bg="lightblue3",padx=150,pady=150)
+    frame=LabelFrame(view,bg="lightblue3",padx=150,pady=30)
     frame.pack()
-    print_all_columns=Button(frame,text="Press to view all columns",bg="slategrey",padx=35,pady=30,command=view_columns);
+    print_all_columns=Button(frame,text="View All Columns",bg="slategrey",padx=63,pady=30,command=view_columns);
     print_all_columns.grid(row=1,column=0,padx=10,pady=20)
     print_all_columns.configure(font=("modern",15))
-    updatebutton = Button(frame, text= "Add Records",padx=86,bg ="slategrey", pady=30,command=add_values)
+    updatebutton = Button(frame, text= "Add Records",padx=79,bg ="slategrey", pady=30,command=add_values)
     updatebutton.grid(row=2,column=0,padx=10,pady=20)
     updatebutton.configure(font=("modern",15))
+    change_column_type = Button(frame, text="Change Table Name", bg ="slategrey", padx=51,pady=30,command = change_name)
+    change_column_type.grid(row = 3, column = 0, padx= 10, pady=20)
+    change_column_type.configure(font=("modern",15))
+    l1=[]
+    q=f"SELECT l.name FROM pragma_table_info('{tableentry.get()}') as l WHERE l.pk = 1;"
+    l1=cur.execute(q).fetchall()
+    if(l1 != []):
+        delete_record = Button(frame, text="Delete Record",bg="slategrey",padx=74,pady=30,command=delete_rec)
+        delete_record.grid(row = 4, column = 0, padx=10, pady=20)
+        delete_record.configure(font=("Modern",15))
+        get_record= Button(frame, text="Get Single Record",bg= "slategrey",padx=60,pady=30,command=lambda:get_records(l1[0][0]))
+        get_record.grid(row=5, column =0, padx=10, pady=20)
+        get_record.configure(font =("modern",15))
     view.resizable(False, False)
     
 def add_column():
     if validation(cnentry) == 0:
         global tabname
+        global primcheck
         global count
         count=count+1
         if (count==1):
-            query= f"CREATE table {tabname}({cnentry.get()} {result});"
+            if(primcheck==0):
+                res = messagebox.askyesno("Unique Column","Would you like to select this column as the Unique Column? (SELECTING 'YES' ALLOWS YOU TO DELETE RECORDS)")
+                if res==1:
+                    primcheck=1
+                    query= f"CREATE table {tabname}({cnentry.get()} {result} PRIMARY KEY);"
+                else:
+                    query= f"CREATE table {tabname}({cnentry.get()} {result});"
             cur.execute(query)
-        else:    
+        else:
             query1 = f"ALTER table {tabname} add {cnentry.get()} {result};"
             cur.execute(query1)
         con.commit()
-
+        messagebox.showinfo('Success!',f"The Column {cnentry.get()} been added!")
     
 def new_table_next():
     if validation(tablename) == 0:
@@ -140,6 +252,7 @@ def new_table_next():
         tabname = tablename.get()
         newtableui.destroy()
         nextui = Toplevel()
+        nextui.iconbitmap("favicon.ico")
         nextui.configure(bg="lightblue3")
         nextui.title("Table Initialization")
         nexttop = Label(nextui,text="Table Initialization",bg="slategrey",padx=10,pady=10)
@@ -167,6 +280,7 @@ def new_table():
     global tabname
     global tablename
     newtableui = Toplevel();
+    newtableui.iconbitmap("favicon.ico")
     newtableui.configure(bg="lightblue3")
     newtableui.title("Table Initialization")
     labeltop = Label(newtableui,text="Table Initialization",bg="slategrey",padx=10,pady=10)
@@ -185,8 +299,10 @@ def new_table():
     newtableui.resizable(False, False)
     
 def pop_up():
+    global primcheck
     response = messagebox.askyesno("Error Finding Table",f"Did not find table {tableentry.get()} in {data.get()}. Do you want to create a new table?")
     if (response==1):
+        primcheck=0
         sqlitepage.destroy()
         new_table()
         
@@ -207,18 +323,24 @@ def check_table():
 def real_generator(exdata, extableentry,filename):
     if '.csv' not in filename:
         filename=filename+'.csv'
-    fp = open(filename,'w')
+    fp = open(filename,'w',newline='')
     write = csv.writer(fp)
     exxcon = sqlite3.connect(exdata.get())
     exxcur = exxcon.cursor()
     query = f"select * from {extableentry.get()};"
     extemp=exxcur.execute(query)
+    name = [description[0] for description in extemp.description]
+    write.writerow(name)
     insertlist = extemp.fetchall()
     for i in insertlist:
         write.writerow(i)
+    messagebox.showinfo('Success!', "The Excel CSV has been generated!")
+    fp.close()
+    exxcon.close()
     
 def excel_generator(exdata, extableentry):
     exdesign = Toplevel()
+    exdesign.iconbitmap("favicon.ico")
     exdesign.configure(bg="lightblue3")
     exdlabel = Label(exdesign,text="Enter File Name",bg="slategrey",padx=30,pady=20)
     exdlabel.configure(font=("modern",30))
@@ -247,6 +369,7 @@ def sqlitepage():
     count=0
     global sqlitepage
     sqlitepage= Toplevel() 
+    sqlitepage.iconbitmap("favicon.ico")
     sqlitepage.title("Sqlite Initialization")
     sqlitepage.configure(bg="lightblue3")
     label2= Label(sqlitepage,text="Sqlite Initialization",bg="slategrey",padx=10,pady=10)
@@ -273,6 +396,7 @@ def sqlitepage():
 
 def excelpage():
     exsqlitepage= Toplevel() 
+    exsqlitepage.iconbitmap("favicon.ico")
     exsqlitepage.title("Excel Initialization")
     exsqlitepage.configure(bg="lightblue3")
     exlabel2= Label(exsqlitepage,text="Excel Initialization",bg="slategrey",padx=10,pady=10)
@@ -297,9 +421,10 @@ def excelpage():
     
 
 root = Tk()
-root.title("Kronos Database")
+root.title("The Blue Database")
+root.iconbitmap("favicon.ico")
 root.configure(bg="lightblue3")
-label1 = Label(root,text="Kronos Database",bg="slategrey",padx=10,pady=10)
+label1 = Label(root,text="The Blue Database",bg="slategrey",padx=10,pady=10)
 label1.config(font=('Modern',40))
 label1.grid(row=0, column=1)
 frame1 = LabelFrame(root,padx=200,pady=200,bg="slategrey")
