@@ -130,6 +130,7 @@ def change_name():
     ctBut = Button(ctframe, text="Submit",padx=30,pady=20,bg="slategrey",command=lambda: real_name_changer(ctentry.get(),changetypewin))
     ctBut.configure(font=("Modern",10))
     ctBut.grid(row = 2, column = 1, pady=10)
+    changetypewin.resizable(FALSE,FALSE)
 
 def del_it(name_of_col, delete_this):
     global cur
@@ -161,6 +162,7 @@ def delete_rec():
     delsub= Button(delframe,text="Submit",bg="slategrey",padx=20,command=lambda:del_it(l2[0][0], laben.get()))
     delsub.configure(font=("modern",15))
     delsub.grid(row=2,column=1,pady=10)
+    delrec.resizable(FALSE,FALSE)
 
 def real_get_record(primary_column,col,frame):
     list1=[]
@@ -190,6 +192,7 @@ def get_records(primary_column):
     grsub = Button(grframe, text="Submit", padx=35,pady=10,bg="slategrey",command = lambda:real_get_record(primary_column, grframeent.get(),grframe))
     grsub.configure(font=("Modern",15))
     grsub.grid(row=2, column = 0,pady=20)
+    grec.resizable(FALSE,FALSE)
     
 def view_table():
     global cur
