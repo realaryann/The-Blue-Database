@@ -4,6 +4,7 @@
   <li>Creating on-the-go Excel Files</li>
   <li>Creating, editing and saving secure and stable SQL tables in custom databases</li>
   <li>Creating and Accessing SQLite Databases</li>
+  <li>Playground for learning how SQLite3 works</li>
  </ul>
  
  <h2>App created using the following technologies:</h2>
@@ -14,7 +15,7 @@
   <li>python-csv</li>
  </ul>
 
- <h3>This project is a SQLite visualizer of sorts that wraps most functionalities that SQL offers into an easy to use GUI.</h3>
+ <h3>This project is a SQLite visualizer of sorts that wraps most functionalities that SQLite3 offers into an easy to use GUI.</h3>
  <p>Current features include: 
  <ol>
    <li>Initializing tables and databases and opening existing tables within databases</li>
@@ -27,5 +28,4 @@
    <li>Geting single records from table</li>
    <li>Converting table into a csv file</li>
  </ol>
- 
  </p>
