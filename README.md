@@ -15,6 +15,8 @@
   <li>python-csv</li>
  </ul>
 
+ ![image](https://github.com/realaryann/The-Blue-Database/assets/70107111/6c961dcf-5fed-428e-8f87-137c0a867e1b)
+
  <h3>This project is a SQLite visualizer of sorts that wraps most functionalities that SQLite3 offers into an easy to use GUI.</h3>
  <p>Current features include: 
  <ol>
