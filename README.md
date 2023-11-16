@@ -32,3 +32,13 @@
    <li>Converting table into a csv file</li>
  </ol>
  </p>
+
+ ![image](https://github.com/realaryann/The-Blue-Database/assets/70107111/0c3d1951-4aaa-4aca-914b-963f9360828f)
+
+<p>Pop up to open or create a new database/table</p>
+
+![image](https://github.com/realaryann/The-Blue-Database/assets/70107111/12c1613d-2317-4c93-bc45-fc875f239ff1)
+
+<p>Pop up to perform queries on an existing table within a database</p>
+
+
